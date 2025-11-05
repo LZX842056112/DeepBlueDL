@@ -1,0 +1,12 @@
+1、github或者kaggle或者其他任意资源，找到一份基于深度学习实现图像分类的代码
+2、能够复现出来，包括训练、测试等过程
+举例：
+https://github.com/ChristofHenkel/kaggle-landmark-2021-1st-place
+https://github.com/PeterH0323/Smart_Construction?tab=readme-ov-file
+等，链接内容可以自己找
+
+提交：
+1、一份文档，内容包括：运行效果截图，运行方法及如何复现的具体步骤截图
+2、复现的源码的链接，最后你复现成功后的整个工程文件打包，和上述文档一起发我云盘连接，复现的时候，对源码做了改动，在文档中要注明具体改动了哪里，怎么改的
+
+完成之后，云盘链接发送772678260@qq.com，邮件附件是你写的文档
