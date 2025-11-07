@@ -1,0 +1,2 @@
+model_checkpoint_path: "D:/Projects/DeepBule/four_flower-master/save\\model.ckpt-999"
+all_model_checkpoint_paths: "D:/Projects/DeepBule/four_flower-master/save\\model.ckpt-999"
