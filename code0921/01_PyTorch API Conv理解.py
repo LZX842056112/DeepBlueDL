@@ -23,7 +23,7 @@ def tt01():
     # 1--> 2
     img_tensor = torch.permute(img_tensor, dims=(2, 0, 1))  # [C,H,W]
     # print(torch.max(torch.abs(img_tensor[:, :, 0] - img_tensor[0])))
-    img_tensor = img_tensor[None]
+    img_tensor = img_tensor[None]  # 添加批次维度，使数据从 [C,H,W] 变为 [1,C,H,W]
     # torch.unsqueeze(img_tensor, dim=0)
 
     # 3.卷积操作
@@ -44,8 +44,8 @@ def tt01():
 
 
 def tt02():
-    conv = nn.Conv2d(3, 20, 3, 1, 0)
     x = torch.randn(4, 3, 30, 30)
+    conv = nn.Conv2d(3, 20, 3, 1, 0)
     o = conv(x)
     print(o.shape)
 
