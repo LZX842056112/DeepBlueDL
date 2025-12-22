@@ -166,5 +166,5 @@ def tt01():
 
 
 if __name__ == '__main__':
-    training()
-    # tt01()
+    # training()
+    tt01()
