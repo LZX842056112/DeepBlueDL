@@ -36,6 +36,7 @@ class ImageClassifyNetwork(nn.Module):
         """
         super().__init__()
         self.conv1 = nn.Conv2d(in_channels, 32, 3, 1, 1)
+        # self.bn1 = nn.BatchNorm2d(32)
         self.pool1 = nn.MaxPool2d(2, 2)  # 1/2
         self.conv2 = nn.Conv2d(32, 64, 3, 1, 1)
         self.pool2 = nn.MaxPool2d(2, 2)  # 1/4
@@ -53,6 +54,7 @@ class ImageClassifyNetwork(nn.Module):
         :return:
         """
         # 1. 卷积 + 激活 [N,C,H,W] --> [N,32,H,W]
+        # x = F.relu(self.bn1(self.conv1(x)))
         x = F.relu(self.conv1(x))
         # 2. 池化 [N,32,H,W] --> [N,32,H/2,W/2]
         x = self.pool1(x)
@@ -164,7 +166,7 @@ def training():
     print(net)
     loss_fn = nn.CrossEntropyLoss()
     loss_fn.to(device=device)
-    train_opt = optim.SGD(params=net.parameters(), lr=0.01)
+    train_opt = optim.SGD(params=net.parameters(), lr=0.01, weight_decay=0)
 
     #         3.2 训练 --> 需要人为进行数据的遍历以及前向反向过程的代码编写
     #             3.2.1 前向过程的执行 ---->
@@ -256,7 +258,8 @@ def training():
         'net_param': net.state_dict(),  # 将模型的参数以dict的形式保存下来
         'loss_param': loss_fn.state_dict(),
         'opt_param': train_opt.state_dict(),
-        'date': datetime.now()
+        'date': datetime.now(),
+        "class_names": class_names
     }
     model_file = './output/model.pkl'
     os.makedirs(os.path.abspath(os.path.dirname(model_file)), exist_ok=True)
