@@ -123,7 +123,7 @@ def tt01():
     # 2. 和训练采用相同的流程，对待预测的数据进行处理转换
     #     PS: 需要注意的是有一些数据增强的处理方法在推理的时候是不执行的；
     img = load_img(
-        img_file="./17flowers/val/c1/image_0002.jpg",
+        img_file="../17flowers/val/c1/image_0002.jpg",
         new_size=(100, 100)
     )
     img = img[None]  # [C,H,W] --> [1,C,H,W]
@@ -143,7 +143,7 @@ def tt02():
     )
 
     r = p.predict(
-        img_file="./17flowers/val/c1/image_0002.jpg"
+        img_file="../17flowers/val/c1/image_0002.jpg"
     )
     print(r)
 

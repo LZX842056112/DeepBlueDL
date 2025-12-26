@@ -25,8 +25,10 @@ def t0():
     print(net)
 
     # 加载图像
-    # path = "cat.jpg"
-    path = "dog.jpeg"
+    # path = "../datas/小猫.jpg"
+    # path = "../datas/小猫2.jpg"
+    # path = "../datas/ssd/images/小狗2.png"
+    path = "../datas/ssd/images/飞机2.jpg"
     # img: Image.Image = Image.open("../datas/小狗.png")
     img: Image.Image = Image.open(path)
     print(img.size)
@@ -123,10 +125,9 @@ def t0():
 
 
 def t1():
-    net = models.alexnet()
-    # net = models.vgg16_bn()
+    net = models.mobilenet_v2()
     print(net)
 
 if __name__ == '__main__':
-    # t0()
     t1()
+

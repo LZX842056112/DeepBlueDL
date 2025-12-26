@@ -148,8 +148,8 @@ def training():
     # 1. 数据加载
     # 2. 数据处理
     #     PS: 数据就变成了tensor格式
-    train_path = r"17flowers\train"
-    val_path = r"17flowers\val"
+    train_path = r"../17flowers\train"
+    val_path = r"../17flowers\val"
     # 训练数据加载
     train_images, train_labels, class_names = load_images(train_path)
     # 验证数据加载: PS --> 验证数据加载的时候，使用和训练数据完全一样的类别标签列表
