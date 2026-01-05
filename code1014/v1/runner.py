@@ -12,8 +12,8 @@ from img_classify.impls.flowers_trainer import FlowersTrainer
 
 if __name__ == '__main__':
     trainer = FlowersTrainer(
-        train_path=r"../17flowers/train",
-        val_path=r"../17flowers/val",
+        train_path=r"../../code0923/17flowers/train",
+        val_path=r"../../code0923/17flowers/val",
         batch_size=8,
         total_epoch=100,
         dump_model_dir="./output",

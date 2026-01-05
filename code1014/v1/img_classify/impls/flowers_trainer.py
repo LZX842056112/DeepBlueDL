@@ -5,7 +5,7 @@ Create User : 19410
 Desc : 17种花的模型训练器
 """
 
-from ..data_utils import build_dataloader, DataAugmentArgs
+from ..data_utils import build_dataloader
 from ..looses import build_losses
 from ..network import build_network
 from ..optim_utils import build_optim, OptimArgs
@@ -19,24 +19,18 @@ class FlowersTrainer(Trainer):
         # 1. 数据加载 数据处理
         _, train_dataloader, class_names = build_dataloader(
             data_dir=train_path, batch_size=batch_size, shuffle=True,
-            target_size=img_target_size,
-            is_augment=True,
-            aug_args=DataAugmentArgs(
-                p_rota=0.8
-            )
+            target_size=img_target_size
         )
         _, val_dataloader, _ = build_dataloader(
             data_dir=val_path, batch_size=batch_size * 2, shuffle=False,
             target_size=img_target_size,
-            class_names=class_names,
-            is_augment=False,
+            class_names=class_names
         )
 
         net = build_network(
             num_classes=len(class_names),
             in_channels=3
         )
-        print(net)
         loss_fn = build_losses()
         train_opt = build_optim(
             args=OptimArgs(

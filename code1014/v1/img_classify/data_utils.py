@@ -5,8 +5,6 @@ Create User : 19410
 Desc : 构造Dataset和DataLoader相关的代码
 """
 import os
-import random
-from dataclasses import dataclass
 from typing import List, Optional
 
 import cv2 as cv
@@ -14,21 +12,6 @@ import numpy as np
 import torch
 
 from torch.utils.data import Dataset, DataLoader
-
-
-@dataclass
-class DataAugmentArgs:
-    p_rota: float = 0.3
-    rota_angle: float = 20
-    rota_scale_lower: float = 0.3
-    rota_scale_high: float = 0.5
-
-    p_cut: float = 0.4
-    cut_lower: float = 0.7
-    cut_upper: float = 1.0
-
-    p_lr_flip: float = 0.5
-    p_tb_flip: float = 0.5
 
 
 def load_datas(dir_path, class_names: Optional[List[str]] = None):
@@ -69,61 +52,24 @@ def load_datas(dir_path, class_names: Optional[List[str]] = None):
 
 
 # noinspection DuplicatedCode
-def load_image(img_file):
+def load_image(img_file, new_size):
     # 加载图像，将图像路径转换为图像对象
     img = cv.imread(img_file)
     # OpenCV原始BGR转RGB
     img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-
-    return img
-
-
-# noinspection DuplicatedCode
-def image_augmentation(img, aug_args: DataAugmentArgs):
-    h, w, _ = img.shape  # 获取原始图像的高度和宽度
-
-    if random.random() < aug_args.p_rota:
-        # 旋转 + 大小缩放
-        angle = random.uniform(-aug_args.rota_angle, aug_args.rota_angle)
-        scale = random.uniform(1.0 - aug_args.rota_scale_lower, 1.0 + aug_args.rota_scale_high)
-        m = cv.getRotationMatrix2D(center=(h / 2, w / 2), angle=angle, scale=scale)
-        img = cv.warpAffine(img, m, (w, h), borderValue=[0, 0, 0])
-
-    if random.random() < aug_args.p_cut:
-        # 随机剪切
-        new_h = min(h, int(h * random.uniform(aug_args.cut_lower, aug_args.cut_upper)))
-        new_w = min(w, int(w * random.uniform(aug_args.cut_lower, aug_args.cut_upper)))
-        start_h = max(0, int(0.5 * h - new_h / 2.0))
-        end_h = min(h, start_h + new_h)
-        start_w = max(0, int(0.5 * w - new_w / 2.0))
-        end_w = min(w, start_w + new_w)
-        img = img[start_h:end_h, start_w:end_w]
-
-    if random.random() < aug_args.p_lr_flip:
-        # 水平方向的翻转/交换
-        img = cv.flip(img, 1)  # 左右翻转
-
-    if random.random() < aug_args.p_tb_flip:
-        # 垂直方向的翻转/交换
-        img = cv.flip(img, 0)  # 上下翻转
+    # 图像大小缩放
+    img = cv.resize(img, new_size)
 
     return img
 
 
 class MyImageDataset(Dataset):
-    def __init__(self,
-                 image_paths: List[str], image_labels: List[int], target_size,
-                 is_augment: bool = False,
-                 aug_args: DataAugmentArgs = None
-                 ):
+    def __init__(self, image_paths: List[str], image_labels: List[int], target_size):
         super().__init__()
         assert len(image_labels) == len(image_paths)
         self.image_paths = image_paths
         self.image_labels = image_labels
         self.target_size = target_size
-
-        self.is_augment = is_augment
-        self.aug_args = aug_args
 
     def __getitem__(self, item):
         """
@@ -136,14 +82,7 @@ class MyImageDataset(Dataset):
         img_label: int = self.image_labels[item]
 
         # 图像加载
-        img = load_image(img_path)
-
-        # 数据增强
-        if self.is_augment:
-            img = image_augmentation(img, self.aug_args)
-
-        # 图像大小缩放
-        img = cv.resize(img, self.target_size)
+        img = load_image(img_path, self.target_size)
 
         # 转换数据并输出
         # [H,W,C] --> [C,H,W]
@@ -162,17 +101,12 @@ class MyImageDataset(Dataset):
         return len(self.image_labels)
 
 
-def build_dataloader(
-        data_dir, batch_size, shuffle, target_size=(100, 100), class_names=None,
-        is_augment: bool = False, aug_args: DataAugmentArgs = None
-):
+def build_dataloader(data_dir, batch_size, shuffle, target_size=(100, 100), class_names=None):
     image_paths, image_labels, class_names = load_datas(data_dir, class_names)
     ds = MyImageDataset(
         image_paths=image_paths,
         image_labels=image_labels,
-        target_size=target_size,
-        is_augment=is_augment,
-        aug_args=aug_args
+        target_size=target_size
     )
     dataloader = DataLoader(
         dataset=ds,

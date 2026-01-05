@@ -6,7 +6,6 @@ Desc : 定义网络相关的代码结构
 """
 
 import torch.nn as nn
-from torchvision import models
 
 
 class ImageClassifyNetwork(nn.Module):
@@ -52,23 +51,9 @@ class ImageClassifyNetwork(nn.Module):
         score = self.classify(x)
         return score
 
-class VGGImageClassifyNetwork(nn.Module):
-    def __init__(self, num_classes, in_channels=3):
-        super().__init__()
-        # 将训练好的vgg模型参数作为我们当前任务的初始参数  -- 模型参数的迁移
-        self.vgg = models.vgg16_bn(weights=models.VGG16_BN_Weights.DEFAULT)
-        del self.vgg.classifier[-1] # 删除最后一个全连接操作
-        self.classify = nn.Linear(in_features=4096, out_features=num_classes)
-
-    def forward(self, image):
-        # 1. 提取vgg特征
-        features = self.vgg(image)
-        # 2. 决策得到置信度
-        score = self.classify(features)
-        return score
 
 def build_network(**kwargs):
-    return VGGImageClassifyNetwork(
+    return ImageClassifyNetwork(
         num_classes=kwargs['num_classes'],
         in_channels=kwargs['in_channels']
     )
