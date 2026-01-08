@@ -29,7 +29,7 @@ def base64_image_str_2_image(img_str):
 
 if __name__ == '__main__':
     b64str = image_base64(
-        image_path=r"../../datas/c1_image_0016.jpg",
+        image_path=r"../../code1026/datas/c1_image_0016.jpg",
         print_data=True
     )
 

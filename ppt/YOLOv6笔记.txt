@@ -1,0 +1,28 @@
+YOLOv6
+    参考:
+        https://github.com/meituan/YOLOv6
+        https://github.com/meituan/YOLOv6/blob/main/README_cn.md
+        https://zhuanlan.zhihu.com/p/534090250
+        https://blog.csdn.net/qq_58355216/article/details/125497521
+        https://zhuanlan.zhihu.com/p/603485390
+        https://blog.csdn.net/qq_46539177/article/details/129101068
+        https://www.jianshu.com/p/e0d1df6172e3
+        https://docs.ultralytics.com/zh/models/yolov6/#overview
+    改进点:相比于YOLOv5结构
+        -1. 骨干/Neck网络部分采用RepBlock(RepVGG)替代CSPBlock结构
+            RepVGG在训练的时候，采用多分支结构，从而增加特征的提取能力/特征组合能力；在推理阶段，将多分支进行合并成单分支结构(pipeline结构, 是一种硬件友好型的结构)
+        -2. 在构Neck部分中采用PAN结
+        -3. 将Head部分的分类和回归拆开，分别使用两个卷积进行模型的预测(分类卷积和回归卷积分开)
+        -4. 正负样本的构建基于SimOTA的方式(正负样本的匹配逻辑发生更改)
+        -5. 分类采用VariFocal Loss，回归采用SIoU/GIoU Loss
+        -6. 基于RepBlock结构，支持在线推理的时候进行网络优化加速:
+            --a. 算子融合：Rep的多分支融合 + Conv/BN的算子融合
+            --b. 模型量化：
+                https://github.com/meituan/YOLOv6/blob/main/tools/qat/README.md
+        -7. SPP结构部分的优化：SPP -> SPPF  -> SimCSPSPPF
+        -8. Bic结构优化：在Neck部分的FPN-PAN结构中，将特征融合的方式发生变化(上采样P_i2+当前特征C_i1 --> 上采样P_i2+当前特征C_i1+下采样C_i0)
+        -9. AnchorFree的预测逻辑:
+            一个grid单元格对应一个预测边框
+                分类分支直接输出这个预测边框中属于各个类别的置信度/概率值
+                回归分支直接输出预测边框的x1y1x2y2相比于grid中心点的偏移值 ---> 回归拟合的是真实边框相比于grid cell中心点的偏移值
+=========================================================

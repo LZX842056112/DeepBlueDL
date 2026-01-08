@@ -28,7 +28,7 @@ def t0():
     # path = "../datas/小猫.jpg"
     # path = "../datas/小猫2.jpg"
     # path = "../datas/ssd/images/小狗2.png"
-    path = "../datas/ssd/images/飞机2.jpg"
+    path = "../code1026/datas/ssd/images/飞机2.jpg"
     # img: Image.Image = Image.open("../datas/小狗.png")
     img: Image.Image = Image.open(path)
     print(img.size)

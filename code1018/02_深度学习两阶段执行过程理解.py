@@ -19,7 +19,7 @@ def stage1():
     负责将图像按照不同的滑动窗口产生不同的子图像
     :return:
     """
-    img_path = "../datas/dog.png"
+    img_path = "../code1026/datas/dog.png"
     img = cv.imread(img_path)
     output_dir = "./output/roi/" + os.path.splitext(os.path.basename(img_path))[0]
     os.makedirs(output_dir, exist_ok=True)

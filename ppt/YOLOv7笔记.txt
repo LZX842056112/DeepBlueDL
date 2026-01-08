@@ -1,0 +1,14 @@
+YOLOv7
+    参考：
+        https://blog.csdn.net/u010899190/article/details/125883770
+        https://blog.csdn.net/u012863603/article/details/126118799
+        https://github.com/WongKinYiu/yolov7
+        https://zhuanlan.zhihu.com/p/554769215
+        https://zhuanlan.zhihu.com/p/540068099
+    改进点：
+        -1. 骨干网络结构修正\Neck结构的修正 --- 使用ELAN结构
+        -2. 最小单元使用RepBlock替代v5中的CSPBlock结构(仅在网络最后的head部分进行替换), ELAN中采用普通卷积
+        -3. 引入MP结构(池化+卷积一起来实现下采样) --> 类似GooLeNet中的
+        -4. 引入SPPCSPC特征融合结构(取代SPPF结构)
+        -5. 模型训练的时候引入辅助训练分支
+        -6. 正负样本匹配逻辑的优化
