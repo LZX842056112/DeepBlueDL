@@ -1,0 +1,129 @@
+YOLOv5
+    参考:
+        https://docs.ultralytics.com/zh/yolov5/
+        https://github.com/ultralytics/yolov5
+        https://docs.ultralytics.com/zh/yolov5/quickstart_tutorial/
+        https://docs.ultralytics.com/zh/usage/cfg/#train-settings
+===========================================================
+文件说明
+    classify: 用YOLOv5的骨干网络实现分类业务
+    data: 存储配置文件
+        data/***.yaml: 数据配置文件，给定数据位置的
+        data/hyps/***.yaml: 超参数配置文件
+        data/images: 测试图像文件所在的文件夹
+        data/scripts: 脚本文件夹，主要用于下载数据(Linux环境下可运行)
+    models: 模型核心代码以及目标检测模型结构配置文件
+    segment: YOLOv5应用到图像分割业务中的训练、预测、评估代码
+    utils: 工具类代码
+    detect.py: 目标检测模型检测的相关代码--> 用训练好的模型做目标检测
+    export.py: 将PyTorch生成的原始格式模型转换成其它格式
+    train.py: 目标检测模型训练代码
+    val.py: 目标检测模型评估代码
+    hubconf.py: 针对torch.hub提供的入口代码文件
+===========================================================
+异常说明：
+    1. OMP: Error #15: Initializing libiomp5md.dll, but found libiomp5md.dll already initialized.
+        产生原因：环境中存在多个libiomp5md.dll文件
+        解决方式：os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE" 或者 删除其中一个文件(libiomp5md.dll)
+    2. pillow版本在python 3.12的时候，建议安装10.4.0以上版本(pip show pillow)
+    3. pillow版本在10.0.0以上的时候，有可能需要修改代码:
+        AttributeError: 'FreeTypeFont' object has no attribute 'getsize'
+        修改 utils\plots.py 中大概 91行左右：
+            w, h = self.font.font.getsize(label)[0]
+===========================================================
+基本操作:
+    NOTE: 所有的python命令行操作，均在yolov5根目录下进行操作
+    NOTE: 可以考虑创建一个新的虚拟环境，建议选择python3.10-3.12之间的版本
+    1. 源码下载和分支的创建
+        源码下载
+        git clone https://github.com/ultralytics/yolov5.git
+        代码导入PyCharm中
+        分支的切换 + 新分支的创建
+            master --[Checkout...]--> v7.0 --[New Branch]--> yolov5_xm_v7.0
+    2. 参考requirements.txt进行依赖库的安装
+        pip install xxxx
+    3. 从github上下载YOLOv5的模型，并放到study文件夹中
+        https://github.com/ultralytics/yolov5/releases/download/v7.0/yolov5s.pt
+    4. 通过PyTorch的hub API应用YOLOv5模型
+        study/01_YOLOv5推理API应用.py
+    5. YOLOv5命令行目标检测效果查看(推理):
+        python detect.py --weights study/yolov5s.pt --source data/images --save-txt
+    6. 基于YOLOv5训练自定义数据集
+        最简单的训练来讲：
+            -a. 给定训练数据配置文件
+                使用YOLO格式进行目标检测数据标注；
+                给定训练数据在磁盘的哪个位置，就是给定路径即可 + 类别标签映射
+                NOTE: 图像x的路径中一定包含文件夹名称:images，标签y的路径中一定包含文件夹名称：labels
+            -b. 从github上下载训练好的yolov5模型作为初始的迁移模型即可
+                python train.py --data ./data/coco128_copy.yaml --weights ./study/yolov5s.pt  --batch-size 4 --workers 0 --epochs 3 --name coco128 --device cpu
+        模型效果测试（推理）
+            python detect.py --weights ./runs/train/coco128/weights/best.pt --source data/images --save-txt --name coco128
+        训练好的模型评估:
+            python val.py --data ./data/coco128_copy.yaml --weights ./runs/train/coco128/weights/best.pt --workers 0 --name coco128
+        模型文件的转换:
+            python export.py --include onnx --weights ./runs/train/coco128/weights/best.pt
+            python export.py --include onnx --weights ./study/yolov5s.pt
+
+============================================================
+YOLOv5的相关结构(v7.0分支代码相比于ppt来讲的变化)：
+-1. 默认激活函数采用: nn.SiLU
+-2. 取消了Focus结构，直接替代为卷积: 6*6的卷积，步长为2，填充为2
+-3. 模型的主要特征提取模块从CSP替换成C3结构：更改了部分卷积操作 + BN位置 + Neck部分的C3也加入了残差
+-4. 将SPP池化更改为SPPF池化: SPPF执行速度更快
+-5. 回归转换公式发生变化:
+    高度/宽度转换公式: ---> 预测边框尺度最多可以是先验框尺度的4倍 --> 大小范围是:[0,4]
+        预测边框宽度=(sigmoid(tw) * 2)**2 * pw
+        预测边框高度=(sigmoid(th) * 2)**2 * ph
+    中心点转换公式:
+        cx=(sigmoid(tx) * 2 - 0.5 + gx) * stride[i]
+        cy=(sigmoid(ty) * 2 - 0.5 + gy) * stride[i]
+    NOTE:
+        gx、gy表示grid cell的左上角坐标
+        pw、ph表示anchor box候选框尺度大小
+        stride表示原始图像和feature map之间的缩放系数
+-6. 分类概率计算采用sigmoid：允许单个预测框对应多个类别的情况存在
+-7. 训练过程中，数据增强：mosaic、mixup、随机的HSV通道增强、随机的水平方向翻转、随机的垂直方向翻转、cutout、基于矩阵坐标映射的增强(OpenCV的API：平移、旋转、缩放、剪切、透视....)、基于框架albumentations的增强(平滑、均衡化转换...)
+-8. 训练过程中，如果给定的anchor box尺度覆盖面不够的情况下，会自适应的计算新的先验框尺度值(自适应先验框尺度计算)
+-9. 在GPU上训练的时候，支持多GPU、混合精度训练(在训练的时候支持float32和float16的计算)
+-10. 训练过程中，支持多尺度训练，支持随机在320~960（默认情况）中随机选择一个能够整除32的尺度
+-11. 学习率的变化支持 WarmUP + linear(cos) 更新方式, WarmUP学习率整体趋势是先增大再减小: 主要目的是为了前期快速更新参数，让参数尽可能的逼近全局最优解，并且跳过局部最优，并且早起(前n个批次)学习率特别小 -- 为了模型适应当前数据集(参数更新慢)。
+    NOTE: bias采用的是整体下降的策略；w对应学习率采用先增大再减小
+-12. 学习率整体角度随着epoch变小(线性变化和余弦变化)
+-13. 优化器进行分组的参数更新，仅对卷积和全连接的W进行惩罚项限制(防止模型过拟合)
+-14. 训练过程中，支持通过参数image_weights更改样本的抽样权重，基于模型各个类别的评估指标(mAP)，更改样本被抽中，参与模型训练的可能性 --> 如果这个类别的mAP评估指标比较高，那么包含这个类别边框的样本被抽中的可能性就降低
+-15. 训练过程中，采用CIoU作为边框回归的损失函数
+    正样本的匹配方式发生变化：
+        由真实边框中心点所在的grid、最近的grid(坐标范围距离grid 边缘0.5以内的对应的grid)进行匹配预测，
+        对应到具体的anchor box来讲，仅获取真实边框大小和anchor box尺度比在1/4~4之间的
+    可以存在以下几种匹配方式:
+        -1-. 一个真实边框对应多个anchor box
+        -2-. 一个anchor box也可以对应多个真实边框
+        -3-. 可能存在真实边框一个对应的anchor box都没有的情况
+    分类分成了两部分:
+        判断是否有物体的分类  ---> 利用预测边框和真实边框的IoU作为标签值来构建损失的
+        判断具体属于哪个类别的分类 ---> sigmoid交叉熵损失函数 ---> 允许一个anchor box的对应预测边框属于多个类别
+-16. 训练过程中，分类损失支持标签平滑的逻辑：标签平滑的主要作用是降低噪声数据对模型的影响
+-17. 训练过程中，支持通过超参数fl_gamma来使用Focal Loss，一般用来解决不平衡的分类问题(正负样本不均衡的问题)
+    https://zhuanlan.zhihu.com/p/266023273
+-18. 模型评估以及持久化保存均使用EMA模型参数平滑处理
+
+============================================================
+train.py执行逻辑理解(debug+check各个阶段)：
+    NOTE:
+        运行train.py文件对应的参数为:
+            --data ./data/coco128_copy.yaml --weights ./study/yolov5s.pt --batch-size 4 --workers 0 --epochs 100 --name debug_coco128 --device cpu --freeze 10 --label-smoothing 0.2
+    1. 从网络上下载对应版本的模型文件：yolov5s.pt，并放到对应文件夹中(默认是train.py所在的文件夹)
+    2. 从网络上下载coco_128数据集，并基于coco128.yaml文件的配置路径，放到对应文件夹中
+    3. 参数代码的更改：
+        --data ./data/coco128_copy.yaml
+        --weights ./study/yolov5s.pt
+        --batch-size 4
+        --workers 0
+        --epochs 100
+        --name debug_coco128
+        --device cpu
+        --freeze 10
+        --label-smoothing 0.2
+
+
+
