@@ -1,0 +1,43 @@
+# YOLOv5 🚀 by Ultralytics, GPL-3.0 license
+# Hyperparameters for low-augmentation COCO training from scratch
+# python train.py --batch 64 --cfg yolov5n6.yaml --weights '' --data coco.yaml --img 640 --epochs 300 --linear
+# See tutorials for hyperparameter evolution https://github.com/ultralytics/yolov5#tutorials
+
+# 优化器相关参数：学习率、惩罚性.....
+lr0: 0.01  # initial learning rate (SGD=1E-2, Adam=1E-3)
+lrf: 0.01  # final OneCycleLR learning rate (lr0 * lrf)
+momentum: 0.937  # SGD momentum/Adam beta1
+weight_decay: 0.0005  # optimizer weight decay 5e-4
+warmup_epochs: 3.0  # warmup epochs (fractions ok)
+warmup_momentum: 0.8  # warmup initial momentum
+warmup_bias_lr: 0.1  # warmup initial bias lr
+
+# 损失函数相关系数：
+box: 0.05  # box loss gain 回归损失的系数
+cls: 0.5  # cls loss gain 边框内实际物体类别的分类损失系数
+cls_pw: 1.0  # cls BCELoss positive_weight 分类加权的权重系数
+obj: 1.0  # obj loss gain (scale with pixels) 边框内是否有物体的损失系数
+obj_pw: 1.0  # obj BCELoss positive_weight 分类加权的权重系数
+fl_gamma: 0.0  # focal loss gamma (efficientDet default gamma=1.5) 给定使用FocalLoss时候的超参数
+
+# anchor box自适应相关系数
+iou_t: 0.20  # IoU training threshold
+anchor_t: 4.0  # anchor-multiple threshold 模型能够预测/考虑到的边框w/h比值范围, eg:[1/4 ~ 4]
+# anchors: 3  # anchors per output layer (0 to ignore)
+
+# 数据增强相关系数
+hsv_h: 0.015  # image HSV-Hue augmentation (fraction) HSV中H增强的系数范围 [1-hsv_h, 1+hsv_h]
+hsv_s: 0.7  # image HSV-Saturation augmentation (fraction) HSV中S增强的系数范围 [1-hsv_s, 1+hsv_s]
+hsv_v: 0.4  # image HSV-Value augmentation (fraction) HSV中V增强的系数范围 [1-hsv_v, 1+hsv_v]
+
+degrees: 0.0  # image rotation (+/- deg) 随机旋转的角度
+translate: 0.1  # image translation (+/- fraction) 随机平移的图像大小百分比 [0.5-translate,0.5+translate]
+scale: 0.5  # image scale (+/- gain) 随机缩放的比例 [1-scale, 1+scale]
+shear: 0.0  # image shear (+/- deg) 随机旋转的角度 Π的系数
+perspective: 0.0  # image perspective (+/- fraction), range 0-0.001  透视变换的随机系数
+
+flipud: 0.0  # image flip up-down (probability) 上下图像数据交换的随机概率
+fliplr: 0.5  # image flip left-right (probability) 左右图像数据交换的随机概率
+mosaic: 1.0  # image mosaic (probability) 做马赛克数据增强的可能性
+mixup: 0.0  # image mixup (probability) mixup的随机概率
+copy_paste: 0.0  # segment copy-paste (probability)

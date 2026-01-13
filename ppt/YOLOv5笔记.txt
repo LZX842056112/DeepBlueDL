@@ -56,6 +56,7 @@ YOLOv5
                 NOTE: 图像x的路径中一定包含文件夹名称:images，标签y的路径中一定包含文件夹名称：labels
             -b. 从github上下载训练好的yolov5模型作为初始的迁移模型即可
                 python train.py --data ./data/coco128_copy.yaml --weights ./study/yolov5s.pt  --batch-size 4 --workers 0 --epochs 3 --name coco128 --device cpu
+                python train.py --data ./data/mnist.yaml --weights ./study/yolov5s.pt  --batch-size 4 --workers 0 --epochs 3 --name mnist --device cpu
         模型效果测试（推理）
             python detect.py --weights ./runs/train/coco128/weights/best.pt --source data/images --save-txt --name coco128
         训练好的模型评估:
