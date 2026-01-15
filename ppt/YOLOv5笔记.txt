@@ -125,6 +125,59 @@ train.py执行逻辑理解(debug+check各个阶段)：
         --device cpu
         --freeze 10
         --label-smoothing 0.2
-
-
-
+    NOTE: 新增自定义模块的步骤：
+        1. 在common.py文件中新建模块，并测试模块
+        2. 在yolo.py文件的模块解析函数parse_model中，增加当前新模块的解析逻辑
+        3. 在当前的模型配置yaml文件中进行更改，使用新模块
+        4. 测试
+        5. 训练使用
+            python train.py --data ./data/coco128_copy.yaml --weights ./study/yolov5s.pt  --batch-size 4 --workers 0 --epochs 3 --name m_coco128 --device cpu --cfg ./models/yolov5s_copy_08.yaml
+        NOTE: 可以自行尝试一下更改下采样、更改骨干网络(MobileNet v3)、更改一下Bi-FPN.......
+============================================================
+export.py文件的逻辑：
+    功能：将一个使用PyTorch框架训练好的yolov5的模型转换为其它的结构(其它深度学习推理框架支持的结构)
+        常用结构：PyTorch、TorchScript、ONNX、OpenVINO、TensorRT
+    命令行运行命令:
+            python export.py --weights ./runs/train/coco128/weights/best.pt --include onnx torchscript
+            python export.py --weights ./runs/train/coco128/weights/best.pt --dynamic --simplify --include onnx torchscript
+============================================================
+val.py文件的逻辑：
+    功能：评估训练好的YOLOv5模型的效果，衡量一个模型效果
+        主要代码：数据加载、模型加载恢复、前向过程、后处理(过滤+NMS)、评估指标的计算、结果保存、可视化...
+    命令：
+        python val.py --data ./data/coco128_copy.yaml --weights ./runs/train/coco128/weights/best.pt --workers 0 --device cpu
+        python val.py --data ./data/coco128_copy.yaml --weights ./runs\train\coco128\weights\best.onnx --workers 0 --device cpu
+============================================================
+detect.py文件的逻辑：
+    功能：一个yolov5的模型推理预测案例，但是这个推理器有一个小问题：考虑的比较全面，所以代码整体比较冗余
+    命令:
+        python detect.py --weights ./runs/train/coco128/weights/best.pt --source data/images --save-txt --device cpu
+        python detect.py --weights ./runs\train\coco128\weights\best.onnx --source data/images --save-txt --device cpu
+============================================================
+YOLOv5部署：
+    需求：基于训练好的模型，对外提供一个接口（方法/HTTP Web API.....）
+    PS:
+        模型部署一般来讲和模型结构没有关系 --> 是通用的
+        部署都可以理解成两部分：
+            a. 内核部分 --> 模型恢复、模型预测
+            b. 对外部分 --> 定义接口、接收接口的入参、入参的解析&校验、调用内核部分代码、结果的处理&返回
+    Python代码部署：
+        NOTE: 真的在部署的时候，模型的结构、格式一定是固定的
+        NOTE: 当前采用ONNX + OpenCV预测 + Flask Web API的方式
+        NOTE: 先编写内核的预测代码 + 再编写对外的代码
+        内核部分：
+            两个方法：
+                __init__初始化方法
+                    入参: 模型路径.....
+                predict预测方法
+                    入参: 图像对象
+                    出参: list[dict]字典的形式，包含的是检测出来的物体信息
+        对外部分:
+            入参：图像的入参一般两种格式：
+                a. 图像的base64编码字符串
+                b. 文件(图像)二进制数据
+            调用模型
+            结果拼接处理返回
+            异常处理
+    PS: 当代码编写好后，可以将代码及模型直接上传到服务器(Linux操作系统的机器，并且该机器已经搭建好服务运行的环境)中，直接运行命令即可。
+        python flask_app.py
