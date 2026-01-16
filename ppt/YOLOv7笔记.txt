@@ -12,3 +12,19 @@ YOLOv7
         -4. 引入SPPCSPC特征融合结构(取代SPPF结构)
         -5. 模型训练的时候引入辅助训练分支
         -6. 正负样本匹配逻辑的优化
+========================================================
+代码：
+    -1. 下载代码
+        git clone https://github.com/WongKinYiu/yolov7.git
+        git clone https://gitee.com/monkeycc/yolov7.git
+    -2. 导入开发工具
+    -3. 更改分支(v0.1)，并创建本地分支  --> 建议直接使用main分支 (yolov7_xm_main)
+    -4. 将yolov7文件夹添加到sys.path环境变量中(PyCharm给定当前代码的运行python环境)
+    -5. 查看代码
+操作：
+    命令行代码:
+        python test.py --data data/coco_16.yaml --img 320 --batch 2 --conf 0.001 --iou 0.65 --device cpu --weights yolov7.pt
+        python test.py --data data/coco_16.yaml --save-txt --img 320 --batch 2 --conf 0.001 --iou 0.65 --device cpu --weights yolov7.pt
+        python train.py --workers 0 --device cpu --batch-size 2 --data data/coco_16.yaml --img 320 320 --cfg cfg/deploy/yolov7.yaml --weights yolov7.pt --hyp data/hyp.scratch.p5.yaml --epochs 3
+        python train_aux.py --workers 0 --device cpu --batch-size 4 --data data/coco_16.yaml --img 320 320 --cfg cfg/training/yolov7-d6.yaml --hyp data/hyp.scratch.p6.yaml --epochs 3 --weights=''
+        python train_aux.py --workers 0 --device cpu --batch-size 4 --data data/coco_16.yaml --img 320 320 --cfg cfg/training/yolov7-d6.yaml --hyp data/hyp.scratch.p6.yaml --epochs 3 --weights=yolov7-d6.pt
