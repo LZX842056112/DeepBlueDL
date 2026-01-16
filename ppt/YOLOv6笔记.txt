@@ -11,7 +11,7 @@ YOLOv6
     改进点:相比于YOLOv5结构
         -1. 骨干/Neck网络部分采用RepBlock(RepVGG)替代CSPBlock结构
             RepVGG在训练的时候，采用多分支结构，从而增加特征的提取能力/特征组合能力；在推理阶段，将多分支进行合并成单分支结构(pipeline结构, 是一种硬件友好型的结构)
-        -2. 在构Neck部分中采用PAN结
+        -2. 在构Neck部分中采用PAN结构
         -3. 将Head部分的分类和回归拆开，分别使用两个卷积进行模型的预测(分类卷积和回归卷积分开)
         -4. 正负样本的构建基于SimOTA的方式(正负样本的匹配逻辑发生更改)
         -5. 分类采用VariFocal Loss，回归采用SIoU/GIoU Loss
@@ -26,3 +26,25 @@ YOLOv6
                 分类分支直接输出这个预测边框中属于各个类别的置信度/概率值
                 回归分支直接输出预测边框的x1y1x2y2相比于grid中心点的偏移值 ---> 回归拟合的是真实边框相比于grid cell中心点的偏移值
 =========================================================
+代码：
+    -1. 下载代码
+        git clone https://github.com/meituan/YOLOv6.git
+        git clone https://gitee.com/monkeycc/YOLOv6.git
+    -2. 导入开发工具
+    -3. 更改分支(0.4.0)，并创建本地分支
+    -4. 查看代码
+    -5. PyCharm给定当前代码的运行python环境
+操作：
+    -1. 新增data/coco_16.yaml数据文件
+    -2. 新增configs/yolov6s_finetune_coco16.py模型配置文件
+    -3. 命令行执行（在YOLOv6根目录下）
+        python tools/train.py --batch 4 --epochs 3 --conf configs/yolov6s_finetune_coco16.py --data data/coco_16.yaml --fuse_ab --device cpu --workers 0
+        python deploy/ONNX/export_onnx.py --weights runs\train\exp\weights\best_ckpt.pt --simplify --device cpu
+        python tools/infer.py --weights runs\train\exp\weights\best_ckpt.pt --source data/images/image1.jpg --device cpu
+    -4. 运行tools/train.py文件(修改一下yolov6s_finetune_coco16.py里面的参数pretrained)
+        普通训练给定参数: --batch 4 --epochs 3 --conf ../configs/yolov6s_finetune_coco16.py --data ../data/coco_16.yaml --fuse_ab --device cpu --workers 0
+        模型蒸馏学习:
+            父模型/老师模型 --> 一般是一个训练好的大模型: yolov6s.pt
+            子模型/学生模型 --> 一般是一个未训练好或者是迁移过来的小模型: yolov6n.pt
+            给定参数:
+                --batch 4 --epochs 3 --conf ../configs/yolov6n_finetune_coco16.py --data ../data/coco_16.yaml  --device cpu --workers 0 --distill --distill_feat --teacher_model_path ../weights/yolov6s.pt
