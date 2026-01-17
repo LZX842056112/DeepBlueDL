@@ -60,3 +60,272 @@ YOLOv8
             先进行目标检测，然后在检测出来的目标框中进一步的判断每个像素区域是否是物体即可(0/1分类)
             训练数据和目标检查差不多，一行一个图像分割的物体
                 cid x1 y1 x2 y2 x3 y3 x4 y4 x5 y5 ....  xn yn
+======================================================================
+操作：
+    -1. 安装环境:
+        pip install ultralytics==8.3.228
+    -2. 命令行操作(yolo命令的执行都是在projects/Detection/yolov8文件夹下执行的)
+        https://docs.ultralytics.com/usage/cli
+        https://docs.ultralytics.com/zh/modes/
+        https://docs.ultralytics.com/usage/cfg/
+        https://docs.ultralytics.com/zh/models/yolov8/#supported-tasks-and-modes
+        yolo
+
+        # 预测
+        yolo predict model=configs/yolov8n.pt source='https://youtu.be/LNwODJXcvt4' imgsz=320
+        yolo predict model=configs/yolov8n.pt source='./images/bus.jpg'
+        yolo predict model=configs/yolov8n.pt source='./images/bus.jpg' save_txt save_crop
+        yolo predict model=configs/yolov8n-seg.pt source='./images/bus.jpg'
+        yolo predict model=configs/yolov8n-seg.pt source='./images/bus.jpg' save_txt
+        yolo predict model=configs/yolov8n-pose.pt source='./images/bus.jpg'
+        yolo predict model=configs/yolov8n-pose.pt source='./images/bus.jpg' save_txt
+        yolo predict model=configs/yolov8n-cls.pt source='./images/bus.jpg'
+        yolo predict model=configs/yolov8n-cls.pt source='./images/bus.jpg' save_txt
+        yolo predict model=configs/yolov8n-obb.pt source='./images/P0861__1024__0___1648.jpg' save_txt
+        yolo predict model=configs/yolov8n.pt source='./images' save_txt save_crop
+        yolo predict model=configs/yolov8n.pt source='./videos' save_txt save_crop
+
+        yolo predict model=./runs/detect/mnist_train/weights/best.pt source='./images/420741_u.png' save_txt save_crop
+        yolo predict model=./runs/detect/mnist/weights/best.pt source='./images/420741_u.png' save_txt save_crop
+        yolo predict model=./runs/detect/mnist/weights/best.onnx source='./images/420741_u.png' save_txt save_crop
+
+        # 静态导出
+        yolo export model=./runs/detect/mnist/weights/best.pt format=onnx
+        yolo export model=configs/yolov8n.pt format=onnx
+        yolo export model=configs/yolov8n-seg.pt format=onnx
+        yolo export model=configs/yolov8n-cls.pt format=onnx
+
+        yolo export model=configs/yolov8n.pt format=onnx nms
+
+
+        # 训练
+        ## 不更改代码的情况，训练仅需要给定数据配置文件yaml、迁移的模型路径以及其它相关参数
+        yolo detect train model=configs/yolov8n.pt data=datasets/coco8.yaml epochs=3 imgsz=640 batch=4 device=cpu workers=0 cos_lr=true mixup=0.3
+        yolo detect train model=configs/yolov8n.pt data=datasets/mnist.yaml epochs=3 imgsz=640 batch=4 device=cpu workers=0 cos_lr=true mixup=0.3 name=mnist_train
+        yolo detect train model=configs/yolov8n.pt data=datasets/mnist.yaml epochs=30 imgsz=640 batch=4 device=cpu workers=0 cos_lr=true mixup=0.3 name=mnist_train
+======= 训练 coco8.yaml 的输出日志
+(cpu_default) PS D:\workspaces\study\CV202502\projects\Detection\yolov8> yolo detect train model=configs/yolov8n.pt data=datasets/coco8.yaml epochs=3 imgsz=640 batch=4 device=cpu workers=0 cos_lr=true mixup=0.3
+Ultralytics 8.3.228  Python-3.12.9 torch-2.3.1+cpu CPU (12th Gen Intel Core(TM) i7-12650H)
+engine\trainer: agnostic_nms=False, amp=True, augment=False, auto_augment=randaugment, batch=4, bgr=0.0, box=7.5, cache=False, cfg=None, classes=None, close_mosaic=10, cls=0.5, compile=False, conf=None, copy_paste=0.0, copy_paste_mode=flip, cos_lr=True, cutmix=0.0, data=datasets/coco8.yaml, degrees=0.0, deterministic=True, device=cpu, dfl=1.5, dnn=False, dropout=0.0, dynamic=False, embed=None, epochs=3, erasing=0.4, exist_ok=False, fliplr=0.5, flipud=0.0, format=torchscript, fraction=1.0, freeze=None, half=False, hsv_h=0.015, hsv_s=0.7, hsv_v=0.4, imgsz=640, int8=False, iou=0.7, keras=False, kobj=1.0, line_width=None, lr0=0.01, lrf=0.01, mask_ratio=4, max_det=300, mixup=0.3, mode=train, model=configs/yolov8n.pt, momentum=0.937, mosaic=1.0, multi_scale=False, name=train2, nbs=64, nms=False, opset=None, optimize=False, optimizer=auto, overlap_mask=True, patience=100, perspective=0.0, plots=True, pose=12.0, pretrained=True, profile=False, project=None, rect=False, resume=False, retina_masks=False, save=True, save_conf=False, save_crop=False, save_dir=D:\workspaces\study\CV202502\projects\Detection\yolov8\runs\detect\train2, save_frames=False, save_json=False, save_period=-1, save_txt=False, scale=0.5, seed=0, shear=0.0, show=False, show_boxes=True, show_conf=True, show_labels=True, simplify=True, single_cls=False, source=None, split=val, stream_buffer=False, task=detect, time=None, tracker=botsort.yaml, translate=0.1, val=True, verbose=True, vid_stride=1, visualize=False, warmup_bias_lr=0.1, warmup_epochs=3.0, warmup_momentum=0.8, weight_decay=0.0005, workers=0, workspace=None
+
+                   from  n    params  module                                       arguments
+  0                  -1  1       464  ultralytics.nn.modules.conv.Conv             [3, 16, 3, 2]
+  1                  -1  1      4672  ultralytics.nn.modules.conv.Conv             [16, 32, 3, 2]
+  2                  -1  1      7360  ultralytics.nn.modules.block.C2f             [32, 32, 1, True]
+  3                  -1  1     18560  ultralytics.nn.modules.conv.Conv             [32, 64, 3, 2]
+  4                  -1  2     49664  ultralytics.nn.modules.block.C2f             [64, 64, 2, True]
+  5                  -1  1     73984  ultralytics.nn.modules.conv.Conv             [64, 128, 3, 2]
+  6                  -1  2    197632  ultralytics.nn.modules.block.C2f             [128, 128, 2, True]
+  7                  -1  1    295424  ultralytics.nn.modules.conv.Conv             [128, 256, 3, 2]
+  8                  -1  1    460288  ultralytics.nn.modules.block.C2f             [256, 256, 1, True]
+  9                  -1  1    164608  ultralytics.nn.modules.block.SPPF            [256, 256, 5]
+ 10                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']
+ 11             [-1, 6]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 12                  -1  1    148224  ultralytics.nn.modules.block.C2f             [384, 128, 1]
+ 13                  -1  1         0  torch.nn.modules.upsampling.Upsample         [None, 2, 'nearest']
+ 14             [-1, 4]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 15                  -1  1     37248  ultralytics.nn.modules.block.C2f             [192, 64, 1]
+ 16                  -1  1     36992  ultralytics.nn.modules.conv.Conv             [64, 64, 3, 2]
+ 17            [-1, 12]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 18                  -1  1    123648  ultralytics.nn.modules.block.C2f             [192, 128, 1]
+ 19                  -1  1    147712  ultralytics.nn.modules.conv.Conv             [128, 128, 3, 2]
+ 20             [-1, 9]  1         0  ultralytics.nn.modules.conv.Concat           [1]
+ 21                  -1  1    493056  ultralytics.nn.modules.block.C2f             [384, 256, 1]
+ 22        [15, 18, 21]  1    897664  ultralytics.nn.modules.head.Detect           [80, [64, 128, 256]]
+Model summary: 129 layers, 3,157,200 parameters, 3,157,184 gradients, 8.9 GFLOPs
+
+Transferred 355/355 items from pretrained weights
+Freezing layer 'model.22.dfl.conv.weight'
+train: Fast image access  (ping: 0.10.0 ms, read: 525.9260.0 MB/s, size: 50.0 KB)
+train: Scanning D:\workspaces\study\CV202502\projects\Detection\yolov8\datasets\coco8\labels\train... 4 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 4/4 238.1it/s 0.0s
+train: New cache created: D:\workspaces\study\CV202502\projects\Detection\yolov8\datasets\coco8\labels\train.cache
+val: Fast image access  (ping: 0.10.0 ms, read: 290.4107.3 MB/s, size: 54.0 KB)
+val: Scanning D:\workspaces\study\CV202502\projects\Detection\yolov8\datasets\coco8\labels\val... 4 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 4/4 1.3Kit/s 0.0s
+val: New cache created: D:\workspaces\study\CV202502\projects\Detection\yolov8\datasets\coco8\labels\val.cache
+Plotting labels to D:\workspaces\study\CV202502\projects\Detection\yolov8\runs\detect\train2\labels.jpg...
+optimizer: 'optimizer=auto' found, ignoring 'lr0=0.01' and 'momentum=0.937' and determining best 'optimizer', 'lr0' and 'momentum' automatically...
+optimizer: AdamW(lr=0.000119, momentum=0.9) with parameter groups 57 weight(decay=0.0), 64 weight(decay=0.0005), 63 bias(decay=0.0)
+Image sizes 640 train, 640 val
+Using 0 dataloader workers
+Logging results to D:\workspaces\study\CV202502\projects\Detection\yolov8\runs\detect\train2
+Starting training for 3 epochs...
+
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+        1/3         0G      1.106      2.642      1.426         30        640: 100% ━━━━━━━━━━━━ 1/1 2.9s/it 2.9s
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 1/1 1.2it/s 0.8s
+                   all          4         17      0.609      0.887      0.888      0.615
+
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+        2/3         0G      1.431      3.973      1.688         51        640: 100% ━━━━━━━━━━━━ 1/1 2.7s/it 2.7s
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 1/1 1.2it/s 0.8s
+                   all          4         17       0.57      0.833      0.874      0.613
+
+      Epoch    GPU_mem   box_loss   cls_loss   dfl_loss  Instances       Size
+        3/3         0G     0.9512      3.175      1.317         26        640: 100% ━━━━━━━━━━━━ 1/1 2.6s/it 2.6s
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 1/1 1.2it/s 0.8s
+                   all          4         17      0.608      0.879      0.887      0.613
+
+3 epochs completed in 0.003 hours.
+Optimizer stripped from D:\workspaces\study\CV202502\projects\Detection\yolov8\runs\detect\train2\weights\last.pt, 6.5MB
+Optimizer stripped from D:\workspaces\study\CV202502\projects\Detection\yolov8\runs\detect\train2\weights\best.pt, 6.5MB
+
+Validating D:\workspaces\study\CV202502\projects\Detection\yolov8\runs\detect\train2\weights\best.pt...
+Ultralytics 8.3.228  Python-3.12.9 torch-2.3.1+cpu CPU (12th Gen Intel Core(TM) i7-12650H)
+Model summary (fused): 72 layers, 3,151,904 parameters, 0 gradients, 8.7 GFLOPs
+                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 100% ━━━━━━━━━━━━ 1/1 1.6it/s 0.6s
+                   all          4         17       0.61      0.887      0.888      0.615
+                person          3         10      0.658        0.5      0.517      0.283
+                   dog          1          1      0.352          1      0.995      0.597
+                 horse          1          2      0.713          1      0.995      0.598
+              elephant          1          2      0.608      0.824      0.828      0.319
+              umbrella          1          1      0.548          1      0.995      0.995
+          potted plant          1          1       0.78          1      0.995      0.895
+Speed: 1.6ms preprocess, 144.6ms inference, 0.0ms loss, 3.4ms postprocess per image
+Results saved to D:\workspaces\study\CV202502\projects\Detection\yolov8\runs\detect\train2
+ Learn more at https://docs.ultralytics.com/modes/train
+--------------------------------------
+    -3. Python代码操作
+        https://docs.ultralytics.com/zh/models/yolov8/#yolov8-usage-examples
+        https://docs.ultralytics.com/zh/usage/python/
+        https://docs.ultralytics.com/zh/modes/
+        https://docs.ultralytics.com/zh/usage/cfg/
+
+================================
+YOLOv8 分类模型
+    PS: YOLOv8环境搭建好，支持目标检测了
+    参考网站：
+        https://docs.ultralytics.com/usage/cli
+        https://docs.ultralytics.com/zh/modes/
+        https://docs.ultralytics.com/zh/tasks/classify/
+        https://docs.ultralytics.com/usage/cfg/#export-settings
+    1. 命令行操作:
+        yolo classify predict model=configs\yolov8n-cls.pt source='https://ultralytics.com/images/bus.jpg'
+        yolo classify predict model=configs\yolov8n-cls.pt source=images
+        yolo classify predict model=configs\yolov8n-cls.pt source=images save_txt
+
+        yolo classify predict model=runs\classify\train\weights\best.pt source=images save_txt
+        yolo classify predict model=runs\classify\train\weights\best.pt source=D:\workspaces\study\CV2502\datas\MNIST\MNIST\images\*\* save_txt
+        yolo classify predict model=runs\classify\train2\weights\best.pt source=D:\datas\17flowers\val\c2\image_0115.jpg     save_txt
+
+        yolo classify val model=configs\yolov8n-cls.pt data=mnist160  save_txt
+        yolo classify val model=runs\classify\train\weights\best.pt data=mnist160  save_txt
+
+        yolo classify export model=configs\yolov8n-cls.pt format=onnx
+
+        # 和目标检测一样，只需要准备好数据，并按照要求的格式放好数据，配置到data数据对应的yaml文件（数据所在的文件夹）；就可以按照下列命令进行训练
+        yolo classify train data=D:\workspaces\study\CV202502\projects\Detection\yolov8\datasets\mnist160 model=configs\yolov8n-cls.pt epochs=20 imgsz=160 batch=4 device=cpu workers=0 cos_lr=true mixup=0.3
+        yolo classify train data=D:\datas\17flowers model=configs\yolov8n-cls.pt epochs=20 imgsz=160 batch=4 device=cpu workers=0 cos_lr=true mixup=0.3
+    2. 代码操作
+        基本同YOLOv8目标检测
+==========================================================
+YOLOv8 图像分割
+    PS: YOLOv8环境搭建好，支持目标检测了
+    参考网站：
+        https://docs.ultralytics.com/usage/cli
+        https://docs.ultralytics.com/zh/modes/
+        https://docs.ultralytics.com/zh/tasks/segment/
+        https://docs.ultralytics.com/usage/cfg/#export-settings
+    1. 命令行操作:
+        yolo segment predict model=configs\yolov8n-seg.pt source='https://ultralytics.com/images/bus.jpg'
+        yolo segment predict model=configs\yolov8n-seg.pt source=images
+        yolo segment predict model=configs\yolov8n-seg.pt source=images save_txt
+        yolo segment predict model=runs\segment\train\weights\best.pt source=images save_txt
+
+        yolo segment val model=configs\yolov8n-seg.pt data=datasets\coco8-seg.yaml save_txt
+
+        yolo segment export model=configs\yolov8n-seg.pt format=onnx
+
+        # 和目标检测一样，只需要准备好数据，并按照要求的格式放好数据，配置到data数据对应的yaml文件；就可以按照下列命令进行训练
+        yolo segment train data=datasets\coco8-seg.yaml model=configs\yolov8n-seg.pt epochs=5 imgsz=160 batch=4 device=cpu workers=0 cos_lr=true mixup=0.3
+    2. 代码操作
+        基本同YOLOv8目标检测
+==========================================================
+YOLOv8 关键点检测
+    PS: YOLOv8环境搭建好，支持目标检测了
+    参考网站：
+        https://docs.ultralytics.com/usage/cli
+        https://docs.ultralytics.com/zh/modes/
+        https://docs.ultralytics.com/zh/tasks/pose/
+        https://docs.ultralytics.com/usage/cfg/#export-settings
+    1. 命令行操作:
+        yolo pose predict model=configs\yolov8n-pose.pt source='https://ultralytics.com/images/bus.jpg'
+        yolo pose predict model=configs\yolov8n-pose.pt source=images
+        yolo pose predict model=configs\yolov8n-pose.pt source=images save_txt
+
+        yolo pose predict model=runs\pose\train\weights\best.pt source=images save_txt
+
+        yolo pose val model=configs\yolov8n-pose.pt data=datasets\coco8-pose.yaml  save_txt
+
+        yolo pose export model=configs\yolov8n-pose.pt format=onnx
+
+        # 和目标检测一样，只需要准备好数据，并按照要求的格式放好数据，配置到data数据对应的yaml文件；就可以按照下列命令进行训练
+        yolo pose train data=datasets\coco8-pose.yaml model=configs\yolov8n-pose.pt epochs=20 imgsz=160 batch=4 device=cpu workers=0 cos_lr=true mixup=0.3
+        PS:
+            训练数据格式：
+                一行一个物体，包含物体所属对应的类别id、对应物体的边框坐标(cx,cy,w,h)、所有关键点的坐标值(x\y\是否可见)
+                    PS: 总的维度数目=1+4+关键点数目*3；一般情况下，关键点检测的模型中只关心一个类别的物体
+    2. 代码操作
+        基本同YOLOv8目标检测
+
+==========================================================
+YOLOv8 定向目标检测
+    PS: YOLOv8环境搭建好，支持目标检测了
+    参考网站：
+        https://docs.ultralytics.com/usage/cli
+        https://docs.ultralytics.com/zh/modes/
+        https://docs.ultralytics.com/zh/tasks/obb/
+        https://docs.ultralytics.com/usage/cfg/#export-settings
+    1. 命令行操作:
+        yolo obb predict model=configs\yolov8n-obb.pt source='https://ultralytics.com/images/boats.jpg'
+        yolo detect predict model=configs\yolov8n.pt source='https://ultralytics.com/images/boats.jpg'
+        yolo obb predict model=configs\yolov8n-obb.pt source='https://ultralytics.com/images/bus.jpg'
+
+        yolo obb predict model=configs\yolov8n-obb.pt source=images
+        yolo obb predict model=configs\yolov8n-obb.pt source=images save_txt
+
+        yolo obb val model=configs\yolov8n-obb.pt data=datasets\dota8.yaml  save_txt
+
+        yolo obb export model=configs\yolov8n-obb.pt format=onnx
+
+        # 和目标检测一样，只需要准备好数据，并按照要求的格式放好数据，配置到data数据对应的yaml文件；就可以按照下列命令进行训练
+        yolo obb train data=datasets\dota8.yaml model=configs\yolov8n-obb.pt epochs=20 imgsz=160 batch=4 device=cpu workers=0 cos_lr=true mixup=0.3
+    2. 代码操作
+        基本同YOLOv8目标检测
+    NOTE:
+        训练数据标注上（同图像分割）：
+            cid、x1、y1、x2、y2、x3、y3、x4、y4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
