@@ -1,0 +1,26 @@
+<annotation verified="yes">
+	<folder>03</folder>
+	<filename>123.jpg</filename>
+	<path>C:\Users\Administrator\Desktop\images\03\123.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>448</width>
+		<height>448</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>plate</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>263</xmin>
+			<ymin>142</ymin>
+			<xmax>380</xmax>
+			<ymax>218</ymax>
+		</bndbox>
+	</object>
+</annotation>
