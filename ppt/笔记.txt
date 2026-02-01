@@ -154,3 +154,97 @@ facenet-pytorch
     3. 人脸支付
     .....
 
+==========================================
+车牌区域检测
+    ----> 目标检测任务 ----> YOLOv5、YOLOv8.....
+    a. 最基本的模型训练
+        1. 车牌数据标注, 采用voc格式表示
+        2. 使用voc2yolo.py代码，将voc格式转换为yolo格式
+        3. 构建data/plates.yaml数据配置文件
+        4. 构建模型配置文件models/yolov5s_plates_v1.yaml（可选）
+        5. 调用python代码训练
+            python train.py --weights ./study/yolov5s.pt --cfg ./models/yolov5s_plates_v1.yaml --data ./data/plates.yaml --epochs 10 --batch-size 8 --workers 0
+        6. 检测 --> 主要看是否有错检、漏检
+            python detect.py --weights runs\train\exp\weights\best.pt --source data\plate_images --view-img --save-txt --max-det 1 --conf-thres 0.20 --augment
+            python detect.py --weights runs\train\exp\weights\best.pt --source data\plate_images\15.jpg --view-img --save-txt --max-det 1 --conf-thres 0.13
+            python detect.py --weights runs\train\exp\weights\best.pt --source data\plate_images\15.jpg --view-img --save-txt --max-det 1 --conf-thres 0.13 --imgsz 1024
+    b. 基于基础模型的效果，进行调整
+        操作：
+            1. 找一批没有参与模型训练的数据集，使用detect.py代码进行预测，查看预测效果
+                针对错检、漏检的情况进行阈值、参数的调整
+            2. 将错检、漏检的数据在训练数据中增加，或者通过更多的数据增强方式来拟合出容易出错的样本数据来
+                在训练数据中，加入更多不容易决策/判断的数据
+            3. 调整训练的方式/网络的结构.....
+                调整先验框的相关信息
+                python train.py --weights ./study/yolov5s.pt --cfg ./models/yolov5s_plates_v2.yaml --data ./data/plates.yaml --epochs 10 --batch-size 8 --workers 0
+                python detect.py --weights runs\train\exp2\weights\best.pt --source data\plate_images --view-img --save-txt --max-det 1 --conf-thres 0.13
+                python detect.py --weights runs\train\exp2\weights\best.pt --source data\plate_images --view-img --save-txt --max-det 1 --conf-thres 0.13 --augment
+
+                扩展：
+                    -1. 将v6/v7/v8/v9....中，你觉得好的模块结构融入到v5中
+                    -2. 可以考虑将最后输出head的3*3卷积更改为5*5卷积，就相当于使用了更大范围的特征进行推理预测，一定程度上可以减少错检的情况
+                    -3. 将分类和回归分支拆解，变成两条独立的分支
+                    -4. 数据增强的改进:
+                        -4.1 fliplr和flipup可以不要
+                        -4.2 hsv的增强可以进行调整一下
+                        -4.3 加大旋转的可能性
+                        -4.4 数据增强的逻辑在最后n个epoch中不生效
+                    -5. NMS的调整
+                    -6. 损失函数的调整
+                    -7. 更改网络结构及损失函数，参考关键点检测思路，模型直接预测出车牌的四个坐标点的位置
+                        使用YOLOv8做目标检测
+                            yolo detect train data=datasets\plates.yaml model=configs\yolov8n-plates.yaml pretrained=configs\yolov8n.pt epochs=10 batch=4 device=cpu workers=0 cos_lr=true
+                            yolo detect predict model=runs\detect\train\weights\best.pt source='../../PlateRecognition/datasets/plate_images/'
+                            yolo export model=runs\detect\train\weights\best.pt format=onnx
+                        使用YOLOv8做关键点检测
+                            yolo pose train data=datasets\plate-keypoints.yaml model=configs\yolov8n-plate-keypoints.yaml pretrained=configs\yolov8n-pose.pt epochs=50 batch=8 device=cpu workers=0 cos_lr=true name=plate_train fliplr=0.0 kobj=5
+                            yolo pose predict model=runs\pose\plate_train\weights\best.pt source='../../PlateRecognition/datasets/plate_images/'
+    c. 模型的部署
+        -a. 将模型转换为onnx结构
+            python export.py --weights runs\train\exp\weights\best.pt --include onnx --dynamic
+            NOTE: 部署采用OpenCV的代码逻辑，所以这里必须转换为静态的onnx结构
+                python export.py --weights runs\train\exp\weights\best.pt --include onnx
+        -b. 将之前的YOLOv5/YOLOv8的部署框架代码复制一份
+        -c. 更改部署依赖的模型文件、相关逻辑代码，将修改好的代码放到服务器即可完成部署(可以先在本地进行测试)
+
+==========================================
+车牌号码的识别/提取
+    实现思路来讲：
+        方式一：基于分类的思路实现
+            在车牌号码区域识别的时候，同步加入关键点识别(识别四个点的坐标)，当识别出车牌的四个点坐标后，直接旋转(透视变换)变成一个正的车牌
+            车牌中各个字符之间的大小是固定的，可以基于规则进行分割，从而形成一个一个单词字符串
+            然后在针对每个单个字符建立分类模型进行预测即可
+        方式二：基于目标检测的思路实现
+            对检测出来的车牌区域图像进行第二次目标检测，当前检测的对应类别就是：字母 + 数字 + 省份 + 特殊文字；
+            类似：手写数字的目标检测实现(识别出数字、 识别出具体数字是多少)
+        方式三：可以直接采用OCR的方式 --> 判别模式 --> 内部本质上来讲还是一个分类模型
+            OCR: 字符识别
+                卷积(Conv) + CTC Loss
+                卷积(Conv) + RNN/LSTM/GRU + CTC Loss
+                卷积(Conv) + Attention/Transformer + CTC Loss
+            完整的OCR一般采用的方式是:
+                a. 先目标检测(检测文字，将文字区域框出来) + 水平矫正
+                    可参考模型: YOLO体系、SegLink、SegLink++
+                        https://github.com/dengdan/seglink
+                        https://github.com/ZJULearning/pixel_link
+                b. 在对文字所在的局部区域进行具体文字内容/具体文字的预测
+                    可参考模型: Conv + Attention/Transformer --> ConvNextViT
+        方式四：OCR的方式 + 生成模式 ---> 生成模型/图生文的结构
+            多模态(VL)的一种结构
+                一般来讲网络结构包含
+                    图像的特征向量提取模块(ImageEncoder)
+                    文本生成模块(TextDecoder)
+    基于modelscope实现OCR
+        https://modelscope.cn/models/iic/cv_convnextTiny_ocr-recognition-licenseplate_damo/summary
+        https://modelscope.cn/docs/%E7%8E%AF%E5%A2%83%E5%AE%89%E8%A3%85
+        https://www.modelscope.cn/models/iic/cv_resnet18_ocr-detection-db-line-level_damo/summary
+        安装命令:
+            pip install modelscope==1.32.0
+            扩展：
+                https://huggingface.co/
+        更改模型下载路径：
+            os.environ['XDG_CACHE_HOME'] = r"D:\huggingface"
+            os.environ['CACHE_HOME'] = r'D:\huggingface'
+            os.environ['MODELSCOPE_CACHE'] = r'D:\huggingface\modelscope\hub'
+
+
