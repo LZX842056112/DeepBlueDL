@@ -1,0 +1,140 @@
+2025-11-28 21:42:07,683 - modelscope - INFO - cuda is not available, using cpu instead.
+2025-11-28 21:42:07,683 - modelscope - INFO - ==========================Training Config Start==========================
+2025-11-28 21:42:07,684 - modelscope - INFO - {
+    "framework": "pytorch",
+    "task": "ocr-recognition",
+    "pipeline": {
+        "type": "convnextTiny-ocr-recognition"
+    },
+    "model": {
+        "type": "OCRRecognition",
+        "recognizer": "ConvNextViT",
+        "inference_kwargs": {
+            "img_height": 32,
+            "img_width": 804,
+            "do_chunking": true
+        }
+    },
+    "preprocessor": {
+        "type": "ocr-recognition"
+    },
+    "train": {
+        "max_epochs": 15,
+        "work_dir": "./output/ocr_workdir_v2",
+        "dataloader": {
+            "batch_size_per_gpu": 4,
+            "workers_per_gpu": 0
+        },
+        "optimizer": {
+            "type": "AdamW",
+            "weight_decay": 0.01,
+            "lr": 0.001,
+            "options": {
+                "grad_clip": {
+                    "max_norm": 20
+                }
+            }
+        },
+        "lr_scheduler": {
+            "type": "MultiStepLR",
+            "milestones": [
+                10,
+                20
+            ],
+            "gamma": 0.1
+        },
+        "hooks": [
+            {
+                "type": "IterTimerHook"
+            }
+        ],
+        "checkpoint": {
+            "period": {
+                "interval": 1,
+                "save_dir": "./output/ocr_workdir_v2"
+            }
+        },
+        "logging": {
+            "interval": 50,
+            "out_dir": "./output/ocr_workdir_v2"
+        }
+    },
+    "evaluation": {
+        "dataloader": {
+            "batch_size_per_gpu": 4,
+            "workers_per_gpu": 0,
+            "shuffle": false
+        },
+        "metrics": "ocr-recognition-metric",
+        "period": {
+            "interval": 1
+        }
+    }
+}
+2025-11-28 21:42:07,684 - modelscope - INFO - ===========================Training Config End===========================
+2025-11-28 21:42:07,685 - modelscope - WARNING - ('OPTIMIZER', 'default', 'AdamW') not found in ast index file
+2025-11-28 21:42:07,686 - modelscope - WARNING - ('LR_SCHEDULER', 'default', 'MultiStepLR') not found in ast index file
+2025-11-28 21:42:07,688 - modelscope - INFO - Stage: before_run:
+    (ABOVE_NORMAL) OptimizerHook                      
+    (LOW         ) LrSchedulerHook                    
+    (LOW         ) CheckpointHook                     
+    (VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+Stage: before_train_epoch:
+    (LOW         ) LrSchedulerHook                    
+ -------------------- 
+Stage: before_train_iter:
+    (ABOVE_NORMAL) OptimizerHook                      
+ -------------------- 
+Stage: after_train_iter:
+    (ABOVE_NORMAL) OptimizerHook                      
+    (NORMAL      ) EvaluationHook                     
+    (LOW         ) LrSchedulerHook                    
+    (LOW         ) CheckpointHook                     
+    (VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+Stage: after_train_epoch:
+    (NORMAL      ) EvaluationHook                     
+    (LOW         ) LrSchedulerHook                    
+    (LOW         ) CheckpointHook                     
+    (VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+Stage: after_val_epoch:
+    (VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+Stage: after_run:
+    (LOW         ) CheckpointHook                     
+ -------------------- 
+2025-11-28 21:42:07,764 - modelscope - INFO - Checkpoints will be saved to ./output/ocr_workdir_v2
+2025-11-28 21:42:07,765 - modelscope - INFO - Text logs will be saved to ./output/ocr_workdir_v2
+2025-11-28 21:42:20,374 - modelscope - INFO - Saving checkpoint at 1 epoch
+2025-11-28 21:42:21,375 - modelscope - INFO - epoch(eval) [1][5]	lr: 0.001, evaluation/accuracy: 0.0500, evaluation/AR: 0.4735, evaluation/avg_loss: 2.5779
+2025-11-28 21:42:34,160 - modelscope - INFO - Saving checkpoint at 2 epoch
+2025-11-28 21:42:35,207 - modelscope - INFO - epoch(eval) [2][5]	lr: 0.001, evaluation/accuracy: 0.2000, evaluation/AR: 0.6879, evaluation/avg_loss: 1.2271
+2025-11-28 21:42:48,483 - modelscope - INFO - Saving checkpoint at 3 epoch
+2025-11-28 21:42:49,473 - modelscope - INFO - epoch(eval) [3][5]	lr: 0.001, evaluation/accuracy: 0.5000, evaluation/AR: 0.8832, evaluation/avg_loss: 0.4506
+2025-11-28 21:43:02,364 - modelscope - INFO - Saving checkpoint at 4 epoch
+2025-11-28 21:43:03,366 - modelscope - INFO - epoch(eval) [4][5]	lr: 0.001, evaluation/accuracy: 0.7000, evaluation/AR: 0.9660, evaluation/avg_loss: 0.1525
+2025-11-28 21:43:16,455 - modelscope - INFO - Saving checkpoint at 5 epoch
+2025-11-28 21:43:17,512 - modelscope - INFO - epoch(eval) [5][5]	lr: 0.001, evaluation/accuracy: 0.9000, evaluation/AR: 0.9894, evaluation/avg_loss: 0.0417
+2025-11-28 21:43:31,310 - modelscope - INFO - Saving checkpoint at 6 epoch
+2025-11-28 21:43:32,364 - modelscope - INFO - epoch(eval) [6][5]	lr: 0.001, evaluation/accuracy: 0.9000, evaluation/AR: 0.9936, evaluation/avg_loss: 0.0508
+2025-11-28 21:43:46,401 - modelscope - INFO - Saving checkpoint at 7 epoch
+2025-11-28 21:43:47,544 - modelscope - INFO - epoch(eval) [7][5]	lr: 0.001, evaluation/accuracy: 0.8500, evaluation/AR: 0.9936, evaluation/avg_loss: 0.0239
+2025-11-28 21:44:01,214 - modelscope - INFO - Saving checkpoint at 8 epoch
+2025-11-28 21:44:02,540 - modelscope - INFO - epoch(eval) [8][5]	lr: 0.001, evaluation/accuracy: 0.9000, evaluation/AR: 0.9958, evaluation/avg_loss: 0.0240
+2025-11-28 21:44:16,082 - modelscope - INFO - Saving checkpoint at 9 epoch
+2025-11-28 21:44:17,380 - modelscope - INFO - epoch(eval) [9][5]	lr: 0.001, evaluation/accuracy: 0.9000, evaluation/AR: 0.9936, evaluation/avg_loss: 0.0126
+2025-11-28 21:44:30,512 - modelscope - INFO - Saving checkpoint at 10 epoch
+2025-11-28 21:44:31,823 - modelscope - INFO - epoch(eval) [10][5]	lr: 0.001, evaluation/accuracy: 1.0000, evaluation/AR: 1.0000, evaluation/avg_loss: 0.0037
+2025-11-28 21:44:44,689 - modelscope - INFO - Saving checkpoint at 11 epoch
+2025-11-28 21:44:46,022 - modelscope - INFO - epoch(eval) [11][5]	lr: 0.0001, evaluation/accuracy: 1.0000, evaluation/AR: 1.0000, evaluation/avg_loss: 0.0034
+2025-11-28 21:44:59,523 - modelscope - INFO - Saving checkpoint at 12 epoch
+2025-11-28 21:45:00,829 - modelscope - INFO - epoch(eval) [12][5]	lr: 0.0001, evaluation/accuracy: 1.0000, evaluation/AR: 1.0000, evaluation/avg_loss: 0.0029
+2025-11-28 21:45:14,549 - modelscope - INFO - Saving checkpoint at 13 epoch
+2025-11-28 21:45:15,595 - modelscope - INFO - epoch(eval) [13][5]	lr: 0.0001, evaluation/accuracy: 1.0000, evaluation/AR: 1.0000, evaluation/avg_loss: 0.0026
+2025-11-28 21:45:28,119 - modelscope - INFO - Saving checkpoint at 14 epoch
+2025-11-28 21:45:29,154 - modelscope - INFO - epoch(eval) [14][5]	lr: 0.0001, evaluation/accuracy: 1.0000, evaluation/AR: 1.0000, evaluation/avg_loss: 0.0022
+2025-11-28 21:45:41,644 - modelscope - INFO - Saving checkpoint at 15 epoch
+2025-11-28 21:45:42,654 - modelscope - INFO - epoch(eval) [15][5]	lr: 0.0001, evaluation/accuracy: 1.0000, evaluation/AR: 1.0000, evaluation/avg_loss: 0.0020
+2025-11-28 21:45:42,654 - modelscope - INFO - Train finished. Uploading models, waiting...

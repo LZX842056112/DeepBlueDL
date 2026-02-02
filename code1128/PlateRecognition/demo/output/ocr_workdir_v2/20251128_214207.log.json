@@ -1,0 +1,15 @@
+{"mode": "eval", "epoch": 1, "iter": 5, "lr": 0.001, "evaluation/accuracy": 0.05, "evaluation/AR": 0.47346, "evaluation/avg_loss": 2.5779}
+{"mode": "eval", "epoch": 2, "iter": 5, "lr": 0.001, "evaluation/accuracy": 0.2, "evaluation/AR": 0.6879, "evaluation/avg_loss": 1.22708}
+{"mode": "eval", "epoch": 3, "iter": 5, "lr": 0.001, "evaluation/accuracy": 0.5, "evaluation/AR": 0.88323, "evaluation/avg_loss": 0.45062}
+{"mode": "eval", "epoch": 4, "iter": 5, "lr": 0.001, "evaluation/accuracy": 0.7, "evaluation/AR": 0.96603, "evaluation/avg_loss": 0.15249}
+{"mode": "eval", "epoch": 5, "iter": 5, "lr": 0.001, "evaluation/accuracy": 0.9, "evaluation/AR": 0.98938, "evaluation/avg_loss": 0.04168}
+{"mode": "eval", "epoch": 6, "iter": 5, "lr": 0.001, "evaluation/accuracy": 0.9, "evaluation/AR": 0.99363, "evaluation/avg_loss": 0.05077}
+{"mode": "eval", "epoch": 7, "iter": 5, "lr": 0.001, "evaluation/accuracy": 0.85, "evaluation/AR": 0.99363, "evaluation/avg_loss": 0.02394}
+{"mode": "eval", "epoch": 8, "iter": 5, "lr": 0.001, "evaluation/accuracy": 0.9, "evaluation/AR": 0.99575, "evaluation/avg_loss": 0.02404}
+{"mode": "eval", "epoch": 9, "iter": 5, "lr": 0.001, "evaluation/accuracy": 0.9, "evaluation/AR": 0.99363, "evaluation/avg_loss": 0.0126}
+{"mode": "eval", "epoch": 10, "iter": 5, "lr": 0.001, "evaluation/accuracy": 1.0, "evaluation/AR": 1.0, "evaluation/avg_loss": 0.00374}
+{"mode": "eval", "epoch": 11, "iter": 5, "lr": 0.0001, "evaluation/accuracy": 1.0, "evaluation/AR": 1.0, "evaluation/avg_loss": 0.00338}
+{"mode": "eval", "epoch": 12, "iter": 5, "lr": 0.0001, "evaluation/accuracy": 1.0, "evaluation/AR": 1.0, "evaluation/avg_loss": 0.00292}
+{"mode": "eval", "epoch": 13, "iter": 5, "lr": 0.0001, "evaluation/accuracy": 1.0, "evaluation/AR": 1.0, "evaluation/avg_loss": 0.00256}
+{"mode": "eval", "epoch": 14, "iter": 5, "lr": 0.0001, "evaluation/accuracy": 1.0, "evaluation/AR": 1.0, "evaluation/avg_loss": 0.00224}
+{"mode": "eval", "epoch": 15, "iter": 5, "lr": 0.0001, "evaluation/accuracy": 1.0, "evaluation/AR": 1.0, "evaluation/avg_loss": 0.00204}
