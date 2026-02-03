@@ -1,0 +1,18 @@
+2025-11-28 20:54:31,437 - modelscope - INFO - cfg value:
+{'miscs': {'print_interval_iters': 20, 'exp_name': 'dbnet_resnet18', 'seed': 1234, 'eval_interval_epochs': 1, 'ckpt_interval_epochs': 1, 'save_interval': 3000, 'output_dir': './workdirs/cv_resnet18_ocr-detection-db-line-level_damo'}, 'model': {'type': 'OCRDetection', 'model_type': 'DBNet', 'backbone': 'resnet18', 'inference_kwargs': {'thresh': 0.2, 'image_short_side': 736, 'return_polygon': False}}, 'dataset': {'train_image_dir': '', 'train_image_list': '', 'val_image_dir': '', 'val_image_list': '', 'train_data_dir': ['./datasets/dbnet_finetune/custom_data/'], 'val_data_dir': ['./datasets/dbnet_finetune/custom_data/'], 'train_data_list': ['./datasets/dbnet_finetune/custom_data/train_list.txt'], 'val_data_list': ['./datasets/dbnet_finetune/custom_data/test_list.txt']}, 'train': {'gpu_ids': [0], 'max_epochs': 300, 'work_dir': './workdirs/cv_resnet18_ocr-detection-db-line-level_damo', 'finetune_path': 'D:\\huggingface\\modelscope\\hub\\models\\iic\\cv_resnet18_ocr-detection-db-line-level_damo\\db_resnet18_public_line_640x640.pt', 'miscs': {'print_interval_iters': 20, 'exp_name': 'dbnet_resnet18', 'seed': 1234, 'eval_interval_epochs': 1, 'ckpt_interval_epochs': 1, 'save_interval': 3000}, 'dataloader': {'batch_size_per_gpu': 64, 'workers_per_gpu': 4, 'num_gpus': 1, 'batch_size': 64, 'num_workers': 0}, 'transform': {'detection_augment': {'augmenter_args': [['Fliplr', 0.5], {'cls': 'Affine', 'rotate': [-10, 10]}, ['Resize', [0.5, 3.0]]], 'only_resize': False, 'keep_ratio': False}, 'random_crop': {'size': [640, 640], 'max_tries': 10}, 'MakeICDARData': True, 'MakeSegDetectionData': True, 'MakeBorderMap': True, 'NormalizeImage': True}, 'total_epochs': 5, 'batch_size': 8, 'base_lr': 0.007}, 'test': {'checkpoint_path': None, 'thresh': 0.2, 'return_polygon': False, 'dataloader': {'batch_size': 1, 'num_gpus': 1, 'num_workers': 0, 'collect_fn': 'ICDARCollectFN'}, 'transform': {'detection_augment': {'augmenter_args': [['Resize', {'width': 1024, 'height': 1024}]], 'only_resize': True, 'keep_ratio': False}, 'MakeICDARData': True, 'MakeSegDetectionData': True, 'NormalizeImage': True, 'collect_fn': 'ICDARCollectFN'}}}
+2025-11-28 20:54:31,541 - modelscope - INFO - finetune from D:\huggingface\modelscope\hub\models\iic\cv_resnet18_ocr-detection-db-line-level_damo\db_resnet18_public_line_640x640.pt
+2025-11-28 20:54:31,591 - modelscope - INFO - Start Training...
+2025-11-28 20:54:31,591 - modelscope - INFO - Training epoch 0
+2025-11-28 20:54:36,373 - modelscope - INFO - step:      0, epoch:   0, loss: 2.211865, lr: 0.007000
+2025-11-28 20:54:36,374 - modelscope - INFO - bce_loss: 0.236503
+2025-11-28 20:54:36,374 - modelscope - INFO - thresh_loss: 0.199366
+2025-11-28 20:54:36,374 - modelscope - INFO - l1_loss: 0.082998
+2025-11-28 20:54:36,374 - modelscope - INFO - save interval model for step 0
+2025-11-28 20:54:36,419 - modelscope - INFO - save_checkpoint to: ./workdirs/cv_resnet18_ocr-detection-db-line-level_damo\model_epoch_0_minibatch_0.pt
+2025-11-28 20:54:36,419 - modelscope - INFO - Training epoch 1
+2025-11-28 20:54:41,219 - modelscope - INFO - Training epoch 2
+2025-11-28 20:54:45,704 - modelscope - INFO - Training epoch 3
+2025-11-28 20:54:50,110 - modelscope - INFO - Training epoch 4
+2025-11-28 20:54:54,634 - modelscope - INFO - Training epoch 5
+2025-11-28 20:54:59,224 - modelscope - INFO - save_checkpoint to: ./workdirs/cv_resnet18_ocr-detection-db-line-level_damo\final.pt
+2025-11-28 20:54:59,424 - modelscope - INFO - Training done
