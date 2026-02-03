@@ -291,6 +291,179 @@ GAN: 生成对抗网络
         https://blog.csdn.net/m0_61878383/article/details/122462196
         https://blog.51cto.com/u_12195/8062235
 =====================================================================
+ViT: vision_transformer
+    参考:
+        https://github.com/google-research/vision_transformer
+        https://arxiv.org/pdf/2010.11929.pdf
+        https://modelscope.cn/models/iic/cv_vit-base_image-classification_Dailylife-labels/summary
+        https://pypi.org/project/mmcls/
+        https://mmclassification.readthedocs.io/en/latest/install.html
+        https://docs.ultralytics.com/zh/models/rtdetr/#overview
+    库依赖：
+        pip install mmcls
+        pip install -U openmim
+        mim install mmcv-full
+        ps: 如果还是安装出错，那么考虑使用Python3.9环境
+    主要思路：
+        -1. 将图像划分成单元格，将每个单元格/局部区域图像看出一个token，从而形成一个token的序列
+        -2. 和Bert一样，在token的最前方加入一个特殊的token(cls) ---> 用来表示全局特征
+        -3. 和Bert一样，给每个token向量增加一个位置编码，表示是第几个token/第几个局部区域
+        -4. token对应的向量分别进行不同参数的全连接，得到Q、K、V；然后就可以通过Transformer结构来提取特征V的融合特征向量
+        NOTE: 将每个局部区域与局部区域，计算相关性，并进行特征融合
+
+        每个局部区域就是一个Token
+        针对图像分类来讲，需要决策输出来判断输入哪个类别 --> 分类任务
+        分类任务中是不是需要获取得到全局的特征向量
+        卷积中常用的方式是:
+            假定输入一个图像3*224*224的图像，经过一系列卷积之后，输出的特征为Z: 768*14*14
+            在卷积神经网络为整体的图像分类模型中，这个使用针对Z会全局平均池化，变成: 768*1*1 -> 也就是得到了全局高阶特征向量
+            最后在全连接得到属于各个类别的置信度(768 -> 1296)
+        ViT中逻辑方式为:
+            假定输入一个图像3*244*224的图像，经过一系列卷积之后，输出的特征为Z: 768*14*14
+            接下来使用Attention/Transformer结构计算每个局部区域与局部区域之间的相关性(总共有14*14+1=197，每个区域的向量维度大小为768)
+            然后针对每个区域，基于这个区域和所有区域之间的相关性计算权重值，然后将所有区域的特征向量v加权合并作为当前区域的特征向量 --> 针对每个区域都是这个操作
+            然后再针对每个区域进行FFN全连接进一步提取当前区域的特征向量
+            重复上述三个操作(提升模型的特征拟合能力)
+            最后得到的就是最终的全局高阶特征向量(相比于之前普通卷积中平均池化的方式，此时这种特征融合是不是就增加了特征的自适应)
+            最后在全连接得到属于各个类别的置信度(768 -> 1296)
+
+            vit的计算逻辑:
+                假定输入图像3*224*224，通过一系列卷积之后，得到的feature map为: 3*2*2
+                这个时候，将feature map进行patch_token转换，得到4个token: T1、T2、T3、T4, 每个token的向量维度大小为3维
+                在最前面加入一个特殊token CLS/T0
+                为了区分token的顺序/token与token之间的距离，针对每个token增加一个位置向量编码（可以模型反向传播更新）
+                    eg:
+                        位置0/CLS/T0: [0.0, 0.0, 0.0]
+                        位置1/T1: [1.0, 0.0, 0.0]
+                        位置2/T2: [0.0, 1.0, 0.0]
+                        位置3/T3: [0.0, 0.0, 1.0]
+                        位置4/T4: [0.5, 0.5, 0.8]
+
+                第一层Transformer Layer的计算：
+                    NOTE: 头里面的WQ、WK、WV是不共享的
+                    第一个头的计算:
+                        将T0/T1/T2/T3/T4组成一个矩阵x[5,3]，分别乘以WQ[3,3]\WK[3,3]\WV[3,3]的参数得到q[5,3]、k[5,3]、v[5,3]
+                            计算相关性: q @ k.T = attn_score[5,5] --> 每个token的query与每个token的key之间的相关性
+                            转换为概率: softmax(attn_score) = attn_alpha[5,5] --> 每个token的query与每个token的key之间的权重值
+                            加权合并value: attn_alpha @ v = new_v[5,3]  --> 每个token都得到了当前token对应的新的特征向量
+                    第二个头的计算:
+                        将T0/T1/T2/T3/T4组成一个矩阵x[5,3]，分别乘以WQ[3,3]\WK[3,3]\WV[3,3]的参数得到q[5,3]、k[5,3]、v[5,3]
+                            计算相关性: q @ k.T = attn_score[5,5] --> 每个token与每个token之间的相关性
+                            转换为概率: softmax(attn_score) = attn_alpha[5,5] --> 每个token与每个token之间的权重值
+                            加权合并value: attn_alpha @ v = new_v[5,3]  --> 每个token都得到了当前token对应的新的特征向量
+
+                    将所有头提取的value合并到一起, concat(new_v_head1, new_v_head2) = new_v[5,6]
+                    将合并后的value做一个WO[num_head*head_dim, 3]，得到attention部分输出: new_v*wo=new_v[5,3]
+                    再将new_v和输入的x进行残差合并，得到新的new_v
+
+                    再将new_v进行FFN全连接操作 + 残差结构，得到整个Transformer模块的输出新的特征向量x[5,3]
+
+                第二层Transformer Layer的计算: 同第一层，只是输入更改为第一层的输出
+                ......
+=====================================================================
+AIGC:
+    全称：AI Generated Content AI生成内容，可以生成图片、视频、声音、音频、文本.....
+    单纯针对文生图内部的实现大框架：
+        首先将给定文本调用NLP相关模型转换为高阶特征向量
+        然后将高阶特征向量调用AE的解码器生成对应的图像
+        NOTE: 在AIGC中大量使用了Attention或者Transformer结构
+    参考：
+        https://huggingface.co/docs/diffusers/v0.27.2/en/index
+        https://huggingface.co/models
+        https://modelscope.cn/models?page=1&tabKey=task&tasks=hotTask:text-to-image-synthesis&type=tasks
+        https://huggingface.co/spaces/black-forest-labs/FLUX.1-dev
+        https://huggingface.co/spaces/stabilityai/stable-diffusion-3.5-large
+        https://huggingface.co/spaces/black-forest-labs/FLUX.2-dev
+=====================================================================
+DDPM：Denoising Diffusion Probabilistic Models  可以认为是一个比较早期的扩散模型
+    参考：
+        https://arxiv.org/pdf/2006.11239
+        https://blog.csdn.net/weixin_43135178/article/details/128060554
+        https://www.zhihu.com/question/559112478/answer/3147179254
+        https://zhuanlan.zhihu.com/p/626688571
+        https://www.liblib.art/sd?id=1714172571890
+        https://github.com/yangqy1110/Diffusion-Models/tree/main
+        https://colab.research.google.com/github/huggingface/notebooks/blob/main/diffusers/training_example.ipynb
+    PS:
+        在DDPM中只有一个UNet的网络结构, 并且UNet网络的输入是图像tensor数据，整个计算量是比较大
+    结合UNet(扩散模型)和AE组成 一个比较统一的图像生成结构:
+        AE: 编码器负责将原始图像转化为高阶特征向量；解码器负责从高阶特征向量恢复成原始图像/目标图像
+        UNet: 负责将AE编码器转换得到的高阶特征向量 + 随机的噪声数据作为输入，预测被添加的噪声数据  一个UNet模型
+            UNet输入包含：
+                AE encoder输出的高阶特征向量(图像特征)、随机的噪声数据、step/timestamp转换的向量、文本/图像特征向量(可选)
+=================================================================================
+CLIP: 文本向量和图像向量的对齐
+    功能：
+        如果一个文本和一个图像表达的是相同的语义信息，那么经过两个不同的网络结构(ImageEncoder和TextEncoder)之后，得到的特征向量应该是相似的；
+        主要目的是为了提取文本特征向量。
+=================================================================================
+SD: Stable Diffusion
+    参考:
+        https://arxiv.org/pdf/2112.10752
+        https://github.com/CompVis/latent-diffusion
+        https://developer.aliyun.com/ask/498384
+        https://zhuanlan.zhihu.com/p/634646929
+        https://blog.csdn.net/u012599545/article/details/136167196
+        https://mp.weixin.qq.com/s?__biz=MzI1MjQ2OTQ3Ng==&mid=2247617834&idx=1&sn=2b8f0f56b8b5b25e5ba1240e5705a6a8&chksm=e9e004a1de978db79be4b5d01829959efb839852f818fabc14e5020c0f26b132e5f044c3bf8f&scene=27&poc_token=HPePL2ajiL3iDjMhpfDmEkF5hZOK3x8WDA0WSoiY
+        https://blog.csdn.net/weixin_47748259/article/details/135541372
+        https://github.com/Stability-AI/stablediffusion?tab=readme-ov-file
+        https://huggingface.co/spaces/stabilityai/stable-diffusion-3.5-large
+        https://huggingface.co/spaces/stabilityai/stable-diffusion-3-medium
+        https://modelscope.cn/models/AI-ModelScope/stable-diffusion-3.5-medium/summary
+    SD扩散模型组件主要包含三个部分:
+        -1. 向量提取组件(指令对应的特征向量提取):
+            负责将外部数据转换为向量
+                比如:
+                    文本，一般是采用Bert、T5、GPT....模型；
+                    一个图像/多个图像.....
+        -2. VAE组件:
+            编码器: 负责将原始图像转换为高阶特征向量 --> 训练UNet组件、微调训练向量提取组件
+            解码器: 负责将最终UNet最终产生的预测高阶特征向量重构成原始图像
+        -3. UNet组件(Image Information Creator):
+            最终的功能/目的：
+                输入一个随机特征向量，输出该随机特征向量包含什么噪声数据(输出值)，
+                    从而得到新的随机特征向量=原始的随机特征向量-噪声数据
+                不断重复/循环这个过程，从而得到最终的高阶特征向量
+            NOTE: 输入包含文本向量，SD中UNet内部结构采用Transformer Block。
+            NOTE: 输入除了随机的特征向量外，还可以有其它外部特征向量输入
+===============================================
+DiT: Scalable Diffusion Models with Transformers 基于Transformer结构的高可扩展性扩散模型
+    参考：
+        https://arxiv.org/pdf/2212.09748
+        https://github.com/facebookresearch/DiT
+        https://zhuanlan.zhihu.com/p/684953658
+    特点：
+        -1. 使用Transformer结构替代了UNet，重点参考了ViT结构
+        -2. DiT作为sora和Stable Diffusion3的底层核心基础技术框架
+===========================================================
+PixArt:
+    参考：
+        https://zhuanlan.zhihu.com/p/684953658
+        https://pixart-alpha.github.io/
+        https://huggingface.co/spaces/PixArt-alpha/PixArt-alpha
+        https://huggingface.co/spaces/PixArt-alpha/PixArt-LCM
+        https://huggingface.co/PixArt-alpha
+        https://github.com/PixArt-alpha/PixArt-alpha?tab=readme-ov-file#-how-to-train
+        https://github.com/PixArt-alpha/PixArt-alpha/blob/53dac066f60fe5fdbdde4f0360145ca96d4cc38c/notebooks/train.ipynb
+        https://huggingface.co/blog/lcm_lora
+        https://github.com/PixArt-alpha/PixArt-alpha/blob/master/asset/docs/pixart_lcm.md
+        https://huggingface.co/blog/lcm_lora
+    特点：
+        -1. 基于DiT的结构进行优化
+        -2. 将文本特征向量模型直接迁移T5模型
+        -3. 优化更改了Transformer Block部分的结构
+        -4. 训练数据做了优化
+
+===========================================================
+U-ViT：
+    参考：
+        https://github.com/baofff/U-ViT?tab=readme-ov-file
+        https://github.com/thu-ml/unidiffuser?tab=readme-ov-file
+        https://arxiv.org/pdf/2209.12152
+    特点：
+        -1. 将ViT应用到U-Net网络中
+===========================================================
+
 
 
 
