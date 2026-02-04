@@ -462,8 +462,33 @@ U-ViT：
         https://arxiv.org/pdf/2209.12152
     特点：
         -1. 将ViT应用到U-Net网络中
-===========================================================
-
-
-
-
+==============================================================
+ControlNet
+    主要应用场景：
+        当存在一个已经训练好的文生图扩散模型，这个时候业务需要在输入文本提示词的基础上，额外的增加一个控制输入(图像、文本....)
+        那么针对新业务需要的模型来讲，有两种方式来实现：
+            方式一：重新训练一个扩散模型，将额外的控制输入+原始文本提示词看成一个整体
+            方式二：在训练好的扩散模型的基础上，使用新的控制输入数据 + 文本提示词 + 生成的最终图像来微调一下扩散模型即可
+                微调的方式有很多，有一种应用非常好的方式： ControlNet
+    ControlNet: 通过添加一些额外的输入条件来控制扩散模型的生成结果的一种网络结构，并且是一种相对比较稳定的增强扩散能力的方法。
+    结构特点：
+        1. 通过引入全零卷积层(当前卷积中的所有参数初始化为0)来减少模型参数的更新
+    参考：
+        https://github.com/lllyasviel/ControlNet?tab=readme-ov-file
+        https://huggingface.co/spaces/hysts/ControlNet-v1-1
+        https://github.com/lllyasviel/ControlNet-v1-1-nightly
+        https://arxiv.org/pdf/2302.05543
+        https://huggingface.co/lllyasviel/ControlNet
+        https://github.com/lllyasviel/ControlNet/blob/main/docs/train.md
+        https://huggingface.co/spaces/hysts/ControlNet
+        https://blog.csdn.net/sinat_15906013/article/details/151430973
+    操作：
+        -1. 从github上下载ControlNet的相关代码
+            git clone https://github.com/lllyasviel/ControlNet.git
+        -2. 创建一个control的虚拟环境，并创建相关的依赖库
+        -3. 从https://huggingface.co/lllyasviel/ControlNet下载一个pth文件
+            当前下载control_sd15_canny.pth并放到ControlNet的models子文件夹中
+        -4. 启动对应的执行命令(命令行启动)
+            python gradio_canny2image.py
+    ps:
+        transformers框架库的版本不要太低了
