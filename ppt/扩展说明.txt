@@ -1,0 +1,23 @@
+CV方向的相关会议：
+    https://arxiv.org/
+    CVPR: https://cvpr.thecvf.com/
+    ICCV: .....
+    ECCV: .....
+    NeurIPS: .....
+    ICML: .....
+    eg:
+        https://github.com/amusi/CVPR2025-Papers-with-Code
+        https://github.com/extreme-assistant/CVPR2024-Paper-Code-Interpretation?tab=readme-ov-file
+==================================================================
+CV应用方法：
+    https://blog.csdn.net/qq_38701868/article/details/103664204
+==================================================================
+Anchor Free目标检测算法：
+    思路一：基于关键点(Keypoint-based)的Anchor Free
+        eg: CornetNet、CenterNet....
+    思路二：基于中心点(Center-based)的Anchor Free
+        eg: YOLOv6、YOLOv8、DETR(Detection Transformer)....
+    思路三：基于图像分割的思路实现目标检测
+    eg：
+        https://cloud.tencent.com/developer/article/2294786
+==================================================================
