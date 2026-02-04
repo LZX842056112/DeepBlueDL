@@ -21,3 +21,21 @@ Anchor Free目标检测算法：
     eg：
         https://cloud.tencent.com/developer/article/2294786
 ==================================================================
+行人重识别
+    整个思路和人脸识别基本一致，可以采用基于特征向量的检索方式来实现
+        1. 首先目标检测获取人区域
+        2. 针对人体区域获取行人对应的特征向量
+        3. 向量的相似度判断
+    https://zhuanlan.zhihu.com/p/456060221
+    http://robustsystems.coe.neu.edu/sites/robustsystems.coe.neu.edu/files/systems/projectpages/reiddataset.html
+    https://github.com/dancing-ui/uestc_vhm
+    https://github.com/JDAI-CV/fast-reid
+==================================================================
+3D图像
+    https://zhuanlan.zhihu.com/p/670383804
+    https://cloud.tencent.com/developer/article/1484408
+==================================================================
+视频生成
+    https://openai.com/zh-Hans-CN/index/sora-2/
+    https://github.com/hpcaitech/Open-Sora/tree/main
+    https://openai.com/index/video-generation-models-as-world-simulators/
